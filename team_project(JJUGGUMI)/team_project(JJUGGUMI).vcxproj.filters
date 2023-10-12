@@ -18,5 +18,28 @@
     <ClCompile Include="test.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="canvas.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jjuggumi.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="keyin.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="sample.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="canvas.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="jjuggumi.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="keyin.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
