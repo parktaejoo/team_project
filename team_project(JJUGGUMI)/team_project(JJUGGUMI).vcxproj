@@ -23,7 +23,6 @@
     <ClCompile Include="jjuggumi.c" />
     <ClCompile Include="keyin.c" />
     <ClCompile Include="sample.c" />
-    <ClCompile Include="test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="canvas.h" />
