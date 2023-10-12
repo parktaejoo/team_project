@@ -31,6 +31,7 @@ int jjuggumi_init(void) {
 
 int main(void) {
 	printf("업로드 테스트\n");
+	printf("업로드 테스트 2");
 	jjuggumi_init();
 	sample();
 	//mugunghwa();
