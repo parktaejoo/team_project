@@ -38,4 +38,3 @@ key_t get_key(void) {
 		return K_UNDEFINED;
 	}	
 }
-//20200552 yoon eun pyeong.english testing.
