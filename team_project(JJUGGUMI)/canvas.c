@@ -86,3 +86,4 @@ void dialog(char message[]) {
 	gotoxy(4, 5);  printf("                    ");
 	gotoxy(5, 5);  printf("                    ");
 	gotoxy(6, 5);  printf("                    ");
+}
