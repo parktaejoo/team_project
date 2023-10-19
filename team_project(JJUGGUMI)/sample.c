@@ -97,10 +97,17 @@ void sample(void) {
 
 		// player 1 부터는 랜덤으로 움직임(8방향)
 		for (int i = 1; i < n_player; i++) {
-			if (tick % period[i] == 0) {
+			if (period[i] != 0 && tick % period[i] == 0) {
 				move_random(i, -1);
 			}
 		}
+
+		// 아래는 원래 오류나던 코드
+		/*for (int i = 1; i < n_player; i++) {
+			if (tick % period[i] == 0) {
+				move_random(i, -1);
+			}
+		}*/
 
 		display();
 		Sleep(10);
