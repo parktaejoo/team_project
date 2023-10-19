@@ -22,7 +22,7 @@ void printxy(char ch, int row, int col) {
 }
 
 void map_init(int n_row, int n_col) {
-	// 두 버퍼를를 완전히 비우기
+	// 두 버퍼를 완전히 비우기
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int j = 0; j < COL_MAX; j++) {
 			back_buf[i][j] = front_buf[i][j] = ' ';
@@ -31,11 +31,15 @@ void map_init(int n_row, int n_col) {
 
 	N_ROW = n_row;
 	N_COL = n_col;
-	for (int i = 0; i < N_ROW; i++) {
-		// 대입문 이렇게 쓸 수 있는데 일부러 안 가르쳐줬음
-		back_buf[i][0] = back_buf[i][N_COL - 1] = '#';
 
-		for (int j = 1; j < N_COL - 1; j++) {
+	for (int i = 0; i < N_ROW; i++) {
+		back_buf[i][0] = back_buf[i][N_COL - 1] = '#'; // 출발선
+
+		if (i >= 3 && i <= N_ROW - 4) {
+			back_buf[i][1] = '#'; //도착선
+		}
+
+		for (int j = 2; j < N_COL - 2; j++) {
 			back_buf[i][j] = (i == 0 || i == N_ROW - 1) ? '#' : ' ';
 		}
 	}
@@ -72,10 +76,18 @@ void draw(void) {
 void print_status(void) {
 	printf("no. of players left: %d\n", n_alive);
 	for (int p = 0; p < n_player; p++) {
-		printf("player %2d: %5s\n", p, player[p] ? "alive" : "DEAD");		
+		printf("player %2d: %5s\n", p, player[p] ? "alive" : "DEAD");
 	}
 }
 
 void dialog(char message[]) {
-
+	for (int i = 0; i < DIALOG_DURATION_SEC; i++) {
+		gotoxy(4, 5); printf("********************");
+		gotoxy(5, 5); printf("%d %s", 4 - i, message);
+		gotoxy(6, 5); printf("********************");
+		Sleep(1000);
+	}
+	gotoxy(4, 5);  printf("                    ");
+	gotoxy(5, 5);  printf("                    ");
+	gotoxy(6, 5);  printf("                    ");
 }

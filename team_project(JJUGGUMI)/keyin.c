@@ -9,7 +9,7 @@ bool is_valid(key_t key) {
 		K_UP,
 		K_DOWN,
 		K_LEFT,
-		K_RIGHT,		
+		K_RIGHT,
 		K_QUIT
 	};
 
@@ -34,7 +34,8 @@ key_t get_key(void) {
 
 	if (is_valid(key)) {
 		return key;
-	} else {
+	}
+	else {
 		return K_UNDEFINED;
-	}	
+	}
 }

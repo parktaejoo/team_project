@@ -16,19 +16,14 @@ void move_tail(int i, int nx, int ny);
 int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이동 주기
 
 void sample_init(void) {
-	map_init(15, 40);
+	map_init(9, 40);
 	int x, y;
 	for (int i = 0; i < n_player; i++) {
-		// 같은 자리가 나오면 다시 생성
-		do {
-			x = randint(1, N_ROW - 2);
-			y = randint(1, N_COL - 2);
-		} while (!placable(x, y));
-		px[i] = x;
-		py[i] = y;
-		period[i] = randint(100, 500);
+		// 출발선에 세우기
+		x = i + 2; // 첫번째 자리와 마지막 번째 자리는 비워 둠
+		y = N_COL - 2; // 오른쪽 부분인 출발선
 
-		back_buf[px[i]][py[i]] = '0' + i;  // (0 .. n_player-1)
+		back_buf[x][y] = '0' + i; // (0 .. n_player-1)
 	}
 
 	tick = 0;
@@ -44,7 +39,7 @@ void move_manual(key_t key) {
 	case K_UP: dir = DIR_UP; break;
 	case K_DOWN: dir = DIR_DOWN; break;
 	case K_LEFT: dir = DIR_LEFT; break;
-	case K_RIGHT: dir = DIR_RIGHT; break;	
+	case K_RIGHT: dir = DIR_RIGHT; break;
 	default: return;
 	}
 
@@ -88,6 +83,8 @@ void sample(void) {
 
 	system("cls");
 	display();
+	dialog("게임을 시작합니다!");
+
 	while (1) {
 		// player 0만 손으로 움직임(4방향)
 		key_t key = get_key();
