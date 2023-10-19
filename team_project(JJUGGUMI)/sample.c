@@ -88,7 +88,8 @@ void sample(void) {
 
 	system("cls");
 	display();
-	dialog("게임을 시작합니다!")
+	dialog("게임을 시작합니다!");
+
 	while (1) {
 		// player 0만 손으로 움직임(4방향)
 		key_t key = get_key();
