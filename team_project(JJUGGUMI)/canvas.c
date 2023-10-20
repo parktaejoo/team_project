@@ -4,14 +4,16 @@
 #include "jjuggumi.h"
 #include "canvas.h"
 
-#define DIALOG_DURATION_SEC		4
+#define DIALOG_DURATION_SEC		2
 
 void draw(void);
 void print_status(void);
 
-char map[11][40], front[11][40];
-
 // (zero-base) row행, col열로 커서 이동
+void gotoxy(int row, int col) {
+	COORD pos = { col,row };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
 
 // row행, col열에 ch 출력
 void printxy(char ch, int row, int col) {
@@ -49,7 +51,7 @@ bool placable(int row, int col) {
 	return true;
 }
 
-//// 상단에 맵을, 하단에는 현재 상태를 출력
+// 상단에 맵을, 하단에는 현재 상태를 출력
 void display(void) {
 	draw();
 	gotoxy(N_ROW + 4, 0);  // 추가로 표시할 정보가 있으면 맵과 상태창 사이의 빈 공간에 출력
@@ -57,12 +59,11 @@ void display(void) {
 }
 
 void draw(void) {
-	for (int i = 0; i < 11; i++) {
-		for (int j = 0; j < 40; j++) {
-			if (front[i][j] != map[i][j]) {
-				front[i][j] = map[i][j];
-				gotoxy(i, j);
-				printf("%c", front[i][j]);
+	for (int row = 0; row < N_ROW; row++) {
+		for (int col = 0; col < N_COL; col++) {
+			if (front_buf[row][col] != back_buf[row][col]) {
+				front_buf[row][col] = back_buf[row][col];
+				printxy(front_buf[row][col], row, col);
 			}
 		}
 	}
@@ -82,7 +83,7 @@ void dialog(char message[]) {
 		gotoxy(6, 5); printf("********************");
 		Sleep(1000);
 	}
-	gotoxy(4, 5);  printf("                    ");
-	gotoxy(5, 5);  printf("                    ");
-	gotoxy(6, 5);  printf("                    ");
+	gotoxy(4, 5);  printf("                          ");
+	gotoxy(5, 5);  printf("                          ");
+	gotoxy(6, 5);  printf("                          ");
 }

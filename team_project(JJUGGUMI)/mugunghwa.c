@@ -1,136 +1,306 @@
 #include <stdio.h>
+#include <conio.h>
+#include <Windows.h>
+#include <stdlib.h>
 #include <time.h>
-typedef
-struct location_data { //0,1,2,3,4번 위치 저장 구조체
-    int x, y;
-}location;
+#include "jjuggumi.h"
+#include "canvas.h"
+#include "keyin.h"
 
-char map[11][40], front[11][40];
+#define DIR_UP		0
+#define DIR_DOWN	1
+#define DIR_LEFT	2
+#define DIR_RIGHT	3
 
-int tick = 0;
+#define DIALOG_DURATION_SEC		4
+
+int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];
+int hwa_map_x = 14, hwa_map_y = 40;
+int young = 3;
+int hwa_switch = 0;
+int btn[10] = { 0 };
+int goal_switch[10] = { 0 };
+
+void goal(int, int, int);
+void mugunghwa(void);
+
+//맵 위치 생성
+void hwamap_init(int n_row, int n_col) {
+	// 두 버퍼를를 완전히 비우기
+	for (int i = 0; i < ROW_MAX; i++) {
+		for (int j = 0; j < COL_MAX; j++) {
+			back_buf[i][j] = front_buf[i][j] = ' ';
+		}
+	}
+
+	N_ROW = n_row;
+	N_COL = n_col;
+	for (int i = 0; i < N_ROW; i++) {
+		// 대입문 이렇게 쓸 수 있는데 일부러 안 가르쳐줬음
+		back_buf[i][0] = back_buf[i][N_COL - 1] = '#';
+
+		for (int j = 1; j < N_COL - 1; j++) {
+			back_buf[i][j] = (i == 0 || i == N_ROW - 1) ? '#' : ' ';
+		}
+	}
+}
+
+//플레이어 위치 생성
+void mugunghwa_init(void) {
+	hwamap_init(hwa_map_x, hwa_map_y);
+	int x, y;
+	for (int i = 0; i < n_player; i++) {
+		x = (hwa_map_x / 2) - (n_player / 2) + i;
+		y = hwa_map_y - 2;
+
+		px[i] = x;
+		py[i] = y;
+		period[i] = randint(100, 500);
+
+		back_buf[px[i]][py[i]] = '0' + i;  // (0 .. n_player-1)
+	}
+
+	tick = 0;
+}
+
+void move_manual_hwa(key_t key) {
+	// 각 방향으로 움직일 때 x, y값 delta
+	static int dx[4] = { -1, 1, 0, 0 };
+	static int dy[4] = { 0, 0, -1, 1 };
+
+	int dir;  // 움직일 방향(0~3)
+
+	switch (key) {
+	case K_UP: dir = DIR_UP;
+		break;
+	case K_DOWN: dir = DIR_DOWN;
+		break;
+	case K_LEFT: dir = DIR_LEFT;
+		break;
+	case K_RIGHT: dir = DIR_RIGHT;
+		break;
+	default: return;
+	}
+
+	// 움직여서 놓일 자리
+	int nx, ny;
+	nx = px[0] + dx[dir];
+	ny = py[0] + dy[dir];
+	if (!placable(nx, ny)) {
+		return;
+	}
+	goal(nx, ny, 0);
+
+	move_tail(0, nx, ny);
+}
+
+//플레이어 움직임
+void move_random_hwa(int player_hwa, int dir) {
+	int p = player_hwa;  // 이름이 길어서...
+	int nx, ny;  // 움직여서 다음에 놓일 자리
+	int rand_num;
+
+	// 움직일 공간이 없는 경우는 없다고 가정(무한 루프에 빠짐)	
+
+	do {
+		rand_num = randint(0, 10);
+		switch (rand_num) {
+		case 0:
+			nx = px[p];
+			ny = py[p] - 1;
+			if (hwa_switch == 1) {
+				btn[p] = 1;
+			}
+			goal(nx, ny, p);
+			break;
+		case 1:
+			nx = px[p] - 1;
+			ny = py[p];
+			if (hwa_switch == 1) {
+				btn[p] = 1;
+			}
+			goal(nx, ny, p);
+			break;
+		case 2:
+			nx = px[p] + 1;
+			ny = py[p];
+			if (hwa_switch == 1) {
+				btn[p] = 1;
+			}
+			goal(nx, ny, p);
+			break;
+		case 3:
+			nx = px[p];
+			ny = py[p] - 1;
+			if (hwa_switch == 1) {
+				btn[p] = 1;
+			}
+			goal(nx, ny, p);
+			break;
+		default:
+			break;
+		}
+		nx = px[p] + randint(-1, 1);
+		ny = py[p] + randint(-1, 0);
+	} while (!placable(nx, ny));
+
+	move_tail(p, nx, ny);
+}
+
+void goal(int nx, int ny, int p) {
+	if (nx == 5 && ny == 1) {
+		player[p] = true;
+		goal_switch[p] = 1;
+	}
+	if (nx == 6 && ny == 2) {
+		player[p] = true;
+		goal_switch[p] = 1;
+	}
+	if (nx == 7 && ny == 2) {
+		player[p] = true;
+		goal_switch[p] = 1;
+	}
+	if (nx == 8 && ny == 2) {
+		player[p] = true;
+		goal_switch[p] = 1;
+	}
+	if (nx == 9 && ny == 1) {
+		player[p] = true;
+		goal_switch[p] = 1;
+	}
+}
+
+void dialog_hwa(int player, char message[]) {
+	for (int i = 0; i < DIALOG_DURATION_SEC; i++) {
+		gotoxy(4, 5); printf("********************");
+		gotoxy(5, 5); printf("%d 플레이어 %d %s", 4 - i, player, message);
+		gotoxy(6, 5); printf("********************");
+		Sleep(1000);
+	}
+	gotoxy(4, 5);  printf("                          ");
+	gotoxy(5, 5);  printf("                          ");
+	gotoxy(6, 5);  printf("                          ");
+}
 
 void mugunghwa(void) {
-    system("cls");
-    int dx[4] = { -1, 1, 0, 0 };
-    int dy[4] = { 0, 0, -1, 0 };
-    int nx = 0, ny = 0;
-    int pass[5] = { 0,0,0,0,0 }, dir[5] = { 3,3,3,3,3 };
-    int c = 0, t = 200;
-    int tick2 = 1, tick_s = 0;
-    int move_check = 0;
-    int heart[5] = { 1,1,1,1,1 }, speed[5] = { 0, 300,300,300,300 };
-    location coord[5] = { {3,38},{4,38},{5,38},{6,38},{7,38} };
-    for (int i = 0; i < 11; i++) {
-        for (int j = 0; j < 45; j++) {
-            if (i == 0 || i == 10 || j == 0 || j == 39)
-                map[i][j] = '*';
-            else
-                map[i][j] = ' ';
-        }
-    }
-    map[4][1] = '#';
-    map[5][1] = '#';
-    map[6][1] = '#';
-    map[3][38] = '0';
-    map[4][38] = '1';
-    map[5][38] = '2';
-    map[6][38] = '3';
-    map[7][38] = '4';
-    srand((unsigned int)time(NULL));
-    int per;
+	int t = 0;
+	int c = 0;
+	int plus = 0;
+	int young_x = (hwa_map_x / 2) - (young / 2);
 
- while (1) {
-        if (_kbhit()) {
-            int key = _getch();
-            switch (key) {
-            case 72: dir[0] = 0; break; // up (x-1, y+0)
-            case 80: dir[0] = 1; break; // down (x+1, y+0)
-            case 75: dir[0] = 2; break; // left (x+0, y-1)
-            case 77: dir[0] = 3; break; // right (x+0, y+1)
-            case 'q': return 0;
-            }
-        }
-        if (tick % 100 == 0 && heart[0] == 1) {
-            player_location(nx, ny, move_check, dir, dx, dy, heart, pass, map, coord);
-            dir[0] = 3;
-        }
-        if (tick % speed[1] == 0 && heart[1] == 1) {
-            per = rand() % 100;
-            computer_location(1, nx, ny, dir, dx, dy, per, coord, map, heart, move_check, pass);
-        }
-        if (tick % speed[2] == 0 && heart[2] == 1) {
-            per = rand() % 100;
-            computer_location(2, nx, ny, dir, dx, dy, per, coord, map, heart, move_check, pass);
-        }
-        if (tick % speed[3] == 0 && heart[3] == 1) {
-            per = rand() % 100;
-            computer_location(3, nx, ny, dir, dx, dy, per, coord, map, heart, move_check, pass);
-        }
-        if (tick % speed[4] == 0 && heart[4] == 1) {
-            per = rand() % 100;
-            computer_location(4, nx, ny, dir, dx, dy, per, coord, map, heart, move_check, pass);
-        }
+	mugunghwa_init();
 
-        if (tick % t == 0 && c < 6) {
-            gotoxy(12, 0);
-            for (int i = 0; i < c; i++) {
-                if (i == 0) {
-                    printf("무 ");
-                }
-                if (i == 1) {
-                    printf("궁 ");
-                }
-                if (i == 2) {
-                    printf("화 ");
-                }
-                if (i == 3) {
-                    printf("꽃 ");
-                }
-                if (i == 4) {
-                    printf("이 ");
-                }
-            }
-            c++;
-        }
-        if (tick % t == 0 && c > 5) {
-            gotoxy(12, 15);
-            for (int j = 4; j < c; j++) {
-                if (j == 4) {
-                    printf("피 ");
-                }
-                if (j == 5) {
-                    printf("었 ");
-                }
-                if (j == 6) {
-                    printf("습 ");
-                }
-                if (j == 7) {
-                    printf("니 ");
-                }
-                if (j == 8) {
-                    printf("다 ");
-                }
-            }
-            c++;
-        }
-        if (c > 10) {
-            map[4][1] = '@', map[5][1] = '@', map[6][1] = '@';
-            move_check = 1;
-            tick_s = 10;
-            dir[1] = 3, dir[2] = 3; dir[3] = 3, dir[4] = 3;
-            if (tick2 % 3001 == 0) {
-                gotoxy(12, 0);
-                printf("                                                                                        ");
-                c = 0;
-                tick2 = 1;
-                tick_s = 0;
-                move_check = 0;
-                map[4][1] = '#', map[5][1] = '#', map[6][1] = '#';
-            }
-        }
-        draw();
-        Sleep(10);
-        tick += 10;
-        tick2 += tick_s;
-    }
+	system("cls");
+	display();
+	/*for (int i = 0; i < n_player; i++) {
+		if (btn[i] == 1) {
+			dialog_hwa(i, " 컷!");
+		}
+	}*/
+	while (1) {
+		// player 0만 손으로 움직임(4방향)
+		key_t key = get_key();
+		if (key == K_QUIT) {
+			break;
+		}
+		else if (key != K_UNDEFINED) {
+			if (btn[0] != 1) {
+				if (goal_switch[0] != 1) {
+					if (hwa_switch == 1) {
+						btn[0] = 1;
+					}
+					move_manual_hwa(key);
+				}
+			}
+		}
+
+		// player 1 부터는 랜덤으로 움직임(8방향)
+		for (int i = 1; i < n_player; i++) {
+			if (tick % period[i] == 0) {
+				if (btn[i] != 1) {
+					if (goal_switch[i] != 1) {
+						move_random_hwa(i, -1);
+					}
+				}
+			}
+		}
+
+		if (c <= 10) {
+			if (tick % 1000 == 0 && c < 6) {
+				gotoxy(15, 0);
+				for (int i = 0; i < c; i++) {
+					if (i == 0) {
+						printf("무 ");
+					}
+					if (i == 1) {
+						printf("궁 ");
+					}
+					if (i == 2) {
+						printf("화 ");
+					}
+					if (i == 3) {
+						printf("꽃 ");
+					}
+					if (i == 4) {
+						printf("이 ");
+					}
+				}
+				c++;
+			}
+			if (tick % 200 == 0 && c > 5) {
+				gotoxy(15, 15);
+				for (int j = 4; j < c; j++) {
+					if (j == 5) {
+						printf("피 ");
+					}
+					if (j == 6) {
+						printf("었 ");
+					}
+					if (j == 7) {
+						printf("습 ");
+					}
+					if (j == 8) {
+						printf("니 ");
+					}
+					if (j == 9) {
+						printf("다 ");
+						for (int i = 0; i < n_player; i++) {
+							if (btn[i] == 1) {
+								dialog_hwa(i, " 죽음!");
+							}
+						}
+					}
+				}
+				c++;
+			}
+		}
+		if (c > 10) {
+			hwa_switch = 1;
+			for (int i = 6; i < 9; i++) {
+				gotoxy(i, 1);
+				printf("@");
+			}
+			if (tick % 4000 == 0) {
+				gotoxy(15, 0);
+				printf("                                                             ");
+				c = 0;
+				hwa_switch = 0;
+			}
+			for (int i = 0; i < 10; i++) {
+				if (btn[i] == 1) {
+					player[i] = false;
+				}
+			}
+		}
+		if (hwa_switch != 1) {
+			for (int i = 6; i < 9; i++) {
+				gotoxy(i, 1);
+				printf("#");
+			}
+		}
+
+		display();
+		Sleep(10);
+		tick += 10;
+	}
 }

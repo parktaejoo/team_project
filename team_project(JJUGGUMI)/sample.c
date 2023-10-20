@@ -8,7 +8,7 @@
 #define DIR_LEFT	2
 #define DIR_RIGHT	3
 
-//void sample_init(void);
+void sample_init(void);
 void move_manual(key_t key);
 void move_random(int i, int dir);
 void move_tail(int i, int nx, int ny);
@@ -16,7 +16,7 @@ void move_tail(int i, int nx, int ny);
 int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이동 주기
 
 void sample_init(void) {
-	map_init(9, 40);
+	map_init(15, 40);
 	int x, y;
 	for (int i = 0; i < n_player; i++) {
 		// 같은 자리가 나오면 다시 생성
@@ -63,6 +63,7 @@ void move_manual(key_t key) {
 void move_random(int player, int dir) {
 	int p = player;  // 이름이 길어서...
 	int nx, ny;  // 움직여서 다음에 놓일 자리
+	int btn = 0;
 
 	// 움직일 공간이 없는 경우는 없다고 가정(무한 루프에 빠짐)	
 
@@ -89,7 +90,6 @@ void sample(void) {
 	system("cls");
 	display();
 	dialog("게임을 시작합니다!");
-
 	while (1) {
 		// player 0만 손으로 움직임(4방향)
 		key_t key = get_key();

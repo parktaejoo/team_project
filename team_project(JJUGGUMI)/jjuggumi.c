@@ -11,30 +11,11 @@ int jjuggumi_init(void);
 void intro(void);
 void ending(void);
 
-void gotoxy(int row, int col);
-void draw(void);
-
-
-void gotoxy(int row, int col) {
-	COORD pos = { col, row }; // 행, 열 반대로 전달
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-}
-
-typedef
-struct location_data { //0,1,2,3,4번 위치 저장 구조체
-	int x, y;
-}location;
-
 // low 이상 high 이하 난수를 발생시키는 함수
-// low와 high 사이의 임의의 정수를 반환하는 역할을 함
-
 int randint(int low, int high) {
 	int rnum = rand() % (high - low + 1) + low;
-	return rnum; 
+	return rnum;
 }
-
-// 게임 초기화 담당
-// 플레이어 수를 입력 받고, 모든 플레이어가 살아있음으로 설정
 
 int jjuggumi_init(void) {
 	srand((unsigned int)time(NULL));
@@ -48,8 +29,6 @@ int jjuggumi_init(void) {
 	}
 	return 0;
 }
-
-// 게임 시작 시 나타나는 인트로(소개 화면)를 출력하는 역할을 함
 
 void intro(void) {
 	system("cls");
@@ -69,8 +48,6 @@ void intro(void) {
 		Sleep(1000);
 	}
 }
-
-// 게임 종료 시 화면에 나타나는 엔딩을 출력하는 역할을 함
 
 void ending(void) {
 	int count = 0;
@@ -98,94 +75,14 @@ void ending(void) {
 	}
 }
 
-int player_location(int nx, int ny, int move_check, int dir[], int dx[], int dy[], int pass[], int heart[], char map[11][40], location coord[]) {
-	if (move_check == 1 && dir[0] != 3) {
-		if (dir[0] == 2) {
-			for (int j = 1; j < coord[0].y; j++) {
-				if (map[coord[0].x][j] != ' ' && map[coord[0].x][j] != '@') {
-					heart[0] = 1;
-				}
-			}
-			if (heart[0] == 0) {
-				map[coord[0].x][coord[0].y] = ' ';
-				return 0;
-			}
-		}
-		else {
-			map[coord[0].x][coord[0].y] = ' ';
-			heart[0] = 0;
-			return 0;
-		}
-	}
-	nx = coord[0].x + dx[dir[0]];
-	ny = coord[0].y + dy[dir[0]];
-	if ((nx == 4 && ny == 2) || (nx == 5 && ny == 2) || (nx == 6 && ny == 2) || (nx == 3 && ny == 1) || (nx == 7 && ny == 1)) {
-		pass[0] = 1;
-	}
-	if (nx > 0 && nx < 10 && ny > 0 && ny < 39 && map[nx][ny] == ' ') {
-		map[coord[0].x][coord[0].y] = ' ';
-		coord[0].x = nx; coord[0].y = ny;
-		map[coord[0].x][coord[0].y] = '0';
-	}
-	return 1;
-}
-
-int computer_location(int a, int nx, int ny, int dir[], int dx[], int dy[], int per, location coord[], char map[11][40], int heart[], int move_check, int pass[]) {
-	if (move_check == 0) {
-		dir[a] = rand() % 10;
-		if (dir[a] < 7) {
-			dir[a] = 2;
-		}
-		else if (dir[a] < 8) {
-			dir[a] = 0;
-		}
-		else if (dir[a] < 9) {
-			dir[a] = 1;
-		}
-		else if (dir[a] < 10) {
-			dir[a] = 3;
-		}
-	}
-	else {
-		if (per < 10) {
-			dir[a] = rand() % 3;
-			if (dir[a] == 2) {
-				for (int j = 1; j < coord[a].y; j++) {
-					if (map[coord[a].x][j] != ' ' && map[coord[a].x][j] != '@') {
-						heart[a] = 1;
-					}
-				}
-				if (heart[a] == 0) {
-					map[coord[a].x][coord[a].y] = ' ';
-					return 0;
-				}
-			}
-			else {
-				map[coord[a].x][coord[a].y] = ' ';
-				heart[a] = 0;
-				return 0;
-			}
-		}
-	}
-	nx = coord[a].x + dx[dir[a]];
-	ny = coord[a].y + dy[dir[a]];
-	if ((nx == 4 && ny == 2) || (nx == 5 && ny == 2) || (nx == 6 && ny == 2) || (nx == 3 && ny == 1) || (nx == 7 && ny == 1)) {
-		pass[a] = 1;
-	}
-	if (nx > 0 && nx < 10 && ny > 0 && ny < 39 && map[nx][ny] == ' ') {
-		map[coord[a].x][coord[a].y] = ' ';
-		coord[a].x = nx; coord[a].y = ny;
-		map[coord[a].x][coord[a].y] = a + '0';
-	}
-	heart[a] = 1;
-}
-
-// 초기화, 인트로, 미니게임들(sample(); ,mugunghwa();, nightgame();, juldarigi();, jebi();
-// 그리고 엔딩 순서로 진행됨
 int main(void) {
 	jjuggumi_init();
 	intro();
-	mugunghwa();   // 여기서 '무궁화 꽃이 피었습니다' 게임을 실행합니다.
+	sample();
+	mugunghwa();
+	//nightgame();
+	//juldarigi();
+	//jebi();
 	ending();
 	return 0;
 }
