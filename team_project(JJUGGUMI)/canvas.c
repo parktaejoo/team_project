@@ -9,11 +9,9 @@
 void draw(void);
 void print_status(void);
 
+char map[11][40], front[11][40];
+
 // (zero-base) row행, col열로 커서 이동
-void gotoxy(int row, int col) {
-	COORD pos = { col,row };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-}
 
 // row행, col열에 ch 출력
 void printxy(char ch, int row, int col) {
@@ -22,7 +20,7 @@ void printxy(char ch, int row, int col) {
 }
 
 void map_init(int n_row, int n_col) {
-	// 두 버퍼를 완전히 비우기
+	// 두 버퍼를를 완전히 비우기
 	for (int i = 0; i < ROW_MAX; i++) {
 		for (int j = 0; j < COL_MAX; j++) {
 			back_buf[i][j] = front_buf[i][j] = ' ';
@@ -31,15 +29,11 @@ void map_init(int n_row, int n_col) {
 
 	N_ROW = n_row;
 	N_COL = n_col;
-
 	for (int i = 0; i < N_ROW; i++) {
-		back_buf[i][0] = back_buf[i][N_COL - 1] = '#'; // 출발선
+		// 대입문 이렇게 쓸 수 있는데 일부러 안 가르쳐줬음
+		back_buf[i][0] = back_buf[i][N_COL - 1] = '#';
 
-		if (i >= 3 && i <= N_ROW - 4) {
-			back_buf[i][1] = '#'; //도착선
-		}
-
-		for (int j = 2; j < N_COL - 2; j++) {
+		for (int j = 1; j < N_COL - 1; j++) {
 			back_buf[i][j] = (i == 0 || i == N_ROW - 1) ? '#' : ' ';
 		}
 	}
@@ -55,7 +49,7 @@ bool placable(int row, int col) {
 	return true;
 }
 
-// 상단에 맵을, 하단에는 현재 상태를 출력
+//// 상단에 맵을, 하단에는 현재 상태를 출력
 void display(void) {
 	draw();
 	gotoxy(N_ROW + 4, 0);  // 추가로 표시할 정보가 있으면 맵과 상태창 사이의 빈 공간에 출력
@@ -63,21 +57,22 @@ void display(void) {
 }
 
 void draw(void) {
-	for (int row = 0; row < N_ROW; row++) {
-		for (int col = 0; col < N_COL; col++) {
-			if (front_buf[row][col] != back_buf[row][col]) {
-				front_buf[row][col] = back_buf[row][col];
-				printxy(front_buf[row][col], row, col);
+	for (int i = 0; i < 11; i++) {
+		for (int j = 0; j < 40; j++) {
+			if (front[i][j] != map[i][j]) {
+				front[i][j] = map[i][j];
+				gotoxy(i, j);
+				printf("%c", front[i][j]);
 			}
 		}
 	}
 }
 
 void print_status(void) {
-	//printf("no. of players left: %d\n", n_alive);
-	//for (int p = 0; p < n_player; p++) {
-	//	printf("player %2d: %5s\n", p, player[p] ? "alive" : "DEAD");
-	//}
+	printf("no. of players left: %d\n", n_alive);
+	for (int p = 0; p < n_player; p++) {
+		printf("player %2d: %5s\n", p, player[p] ? "alive" : "DEAD");
+	}
 }
 
 void dialog(char message[]) {
