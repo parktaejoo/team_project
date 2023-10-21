@@ -12,7 +12,7 @@
 #define DIR_LEFT	2
 #define DIR_RIGHT	3
 
-#define DIALOG_DURATION_SEC		4
+#define DIALOG_DURATION_SEC		2
 
 int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];
 int hwa_map_x = 14, hwa_map_y = 40;
@@ -20,6 +20,8 @@ int young = 3;
 int hwa_switch = 0;
 int btn[10] = { 0 };
 int goal_switch[10] = { 0 };
+int dead_s[10] = { 0 };
+int nswitch[10] = { 0 };
 
 void goal(int, int, int);
 void mugunghwa(void);
@@ -103,7 +105,7 @@ void move_random_hwa(int player_hwa, int dir) {
 	// 움직일 공간이 없는 경우는 없다고 가정(무한 루프에 빠짐)	
 
 	do {
-		rand_num = randint(0, 10);
+		rand_num = randint(0, 8);
 		switch (rand_num) {
 		case 0:
 			nx = px[p];
@@ -189,9 +191,9 @@ void mugunghwa(void) {
 	int young_x = (hwa_map_x / 2) - (young / 2);
 
 	mugunghwa_init();
-
 	system("cls");
 	display();
+	dialog("무궁화꽃이피었습니다");
 	/*for (int i = 0; i < n_player; i++) {
 		if (btn[i] == 1) {
 			dialog_hwa(i, " 컷!");
@@ -264,11 +266,7 @@ void mugunghwa(void) {
 					}
 					if (j == 9) {
 						printf("다 ");
-						for (int i = 0; i < n_player; i++) {
-							if (btn[i] == 1) {
-								dialog_hwa(i, " 죽음!");
-							}
-						}
+
 					}
 				}
 				c++;
@@ -287,8 +285,16 @@ void mugunghwa(void) {
 				hwa_switch = 0;
 			}
 			for (int i = 0; i < 10; i++) {
-				if (btn[i] == 1) {
+				if (btn[i] == 1 && nswitch[i] != 1) {
 					player[i] = false;
+					dead_s[i] = 1;
+				}
+			}
+			for (int i = 0; i < n_player; i++) {
+				if (btn[i] == 1 && dead_s[i] == 1) {
+					dialog_hwa(i, "플레이어 죽음");
+					dead_s[i] = 0;
+					nswitch[i] = 1;
 				}
 			}
 		}
@@ -302,5 +308,15 @@ void mugunghwa(void) {
 		display();
 		Sleep(10);
 		tick += 10;
+		int j;
+		j = 0;
+		for (int i = 0; i < n_player; i++) {
+			if (player[i] == true) {
+				j++;
+			}
+		}
+		if (j == 1) {
+			break;
+		}
 	}
 }
