@@ -175,7 +175,7 @@ void goal(int nx, int ny, int p) {
 void dialog_hwa(int player, char message[]) {
 	for (int i = 0; i < DIALOG_DURATION_SEC; i++) {
 		gotoxy(4, 5); printf("********************");
-		gotoxy(5, 5); printf("%d 플레이어 %d %s", 4 - i, player, message);
+		gotoxy(5, 5); printf("%d 플레이어 %d %s", 2 - i, player, message);
 		gotoxy(6, 5); printf("********************");
 		Sleep(1000);
 	}

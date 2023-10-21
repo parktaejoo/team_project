@@ -4,7 +4,7 @@
 #include "jjuggumi.h"
 #include "canvas.h"
 
-#define DIALOG_DURATION_SEC		2
+#define DIALOG_DURATION_SEC		4
 
 void draw(void);
 void print_status(void);
